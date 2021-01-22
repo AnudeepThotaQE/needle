@@ -79,9 +79,16 @@ class NeedleWebElementMixin(object):
             # Fall back to cropping a full page screenshot
             image = self._parent.get_screenshot_as_image()
 
-        window_size = int(self.driver.execute_script("return screen.width;")), int(
-            self.driver.execute_script("return screen.height;"))
-        image_size = image.size
+        if self.driver.capabilities.get('deviceName') is not None:
+            inner_height = int(self.driver.execute_script(
+                "return Math.max(document.documentElement.clientHeight, window.innerHeight || 0);"))
+            screen_width = int(self.driver.execute_script("return screen.width;"))
+            window_size = screen_width, inner_height + 58
+            image = image.resize(window_size, Image.ANTIALIAS)
+            image_size = image.size
+        else:
+            window_size= int(self.driver.execute_script("return screen.width;")), int(
+                self.driver.execute_script("return screen.height;"))
         ratio = self._get_ratio(image_size, window_size)
         if isinstance(exclude, (list, tuple)) and exclude:
             elements = [self.driver.find_element(*element) for element in exclude]
@@ -96,6 +103,7 @@ class NeedleWebElementMixin(object):
             return image.crop([point * ratio for point in (include_dimensions['left'], include_dimensions['top'],
                                                            (include_dimensions['left'] + include_dimensions['width']),
                                                            (include_dimensions['top'] + include_dimensions['height']))])
+
         return image
 
 
