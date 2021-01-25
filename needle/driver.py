@@ -79,16 +79,23 @@ class NeedleWebElementMixin(object):
             # Fall back to cropping a full page screenshot
             image = self._parent.get_screenshot_as_image()
 
+        inner_height = int(self.driver.execute_script(
+            "return Math.max(document.documentElement.clientHeight, window.innerHeight || 0);"))
+        screen_height = int(self.driver.execute_script("return screen.height;"))
+        screen_width = int(self.driver.execute_script("return screen.width;"))
+        window_size = screen_width, screen_height
+
         if self.driver.capabilities.get('deviceName') is not None:
-            inner_height = int(self.driver.execute_script(
-                "return Math.max(document.documentElement.clientHeight, window.innerHeight || 0);"))
-            screen_width = int(self.driver.execute_script("return screen.width;"))
-            window_size = screen_width, inner_height + 58
+            if self.driver.capabilities.get('platformName') == 'Android':
+                status_bar_height = 58
+                window_size = screen_width, inner_height + status_bar_height
+
             image = image.resize(window_size, Image.ANTIALIAS)
-            image_size = image.size
-        else:
-            window_size= int(self.driver.execute_script("return screen.width;")), int(
-                self.driver.execute_script("return screen.height;"))
+
+            if self.driver.capabilities.get('platformName') == 'iOS':
+                image = image.crop((0, 73, screen_width, screen_height))
+
+        image_size = image.size
         ratio = self._get_ratio(image_size, window_size)
         if isinstance(exclude, (list, tuple)) and exclude:
             elements = [self.driver.find_element(*element) for element in exclude]
