@@ -87,11 +87,17 @@ class NeedleWebElementMixin(object):
 
         if self.driver.capabilities.get('deviceName') is not None:
             if self.driver.capabilities.get('platformName') == 'Android':
+                """ Screenshot on Android Chrome doesn't contain the status bar, however it looks like the viewport height 
+                changes when the status bar is hidden. Adding status bar height to the screen inner height equal the new
+                viewport height"""
                 status_bar_height = 58
                 window_size = screen_width, inner_height + status_bar_height
 
             image = image.resize(window_size, Image.ANTIALIAS)
 
+            """ Screenshot on iOS Safari includes its status bar (top) and navigation bar (bottom). It causes the 
+            Y corrdinate to be incorrect since element position relative to the viewport. The workaround for now is to 
+            crop off the status bar"""
             if self.driver.capabilities.get('platformName') == 'iOS':
                 image = image.crop((0, 73, screen_width, screen_height))
 
