@@ -79,9 +79,12 @@ class NeedleWebElementMixin(object):
             # Fall back to cropping a full page screenshot
             image = self._parent.get_screenshot_as_image()
 
+        # viewport height is inner height
         inner_height = int(self.driver.execute_script(
             "return Math.max(document.documentElement.clientHeight, window.innerHeight || 0);"))
+        # screen height includes the status bar and navigation bar
         screen_height = int(self.driver.execute_script("return screen.height;"))
+        # screen width includes horizontal scroll bar
         screen_width = int(self.driver.execute_script("return screen.width;"))
         window_size = screen_width, screen_height
 
@@ -99,7 +102,8 @@ class NeedleWebElementMixin(object):
             Y corrdinate to be incorrect since element position relative to the viewport. The workaround for now is to 
             crop off the status bar"""
             if self.driver.capabilities.get('platformName') == 'iOS':
-                image = image.crop((0, 73, screen_width, screen_height))
+                status_bar_height = 73
+                image = image.crop((0, status_bar_height, screen_width, screen_height))
 
         image_size = image.size
         ratio = self._get_ratio(image_size, window_size)
