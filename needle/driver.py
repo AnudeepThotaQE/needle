@@ -100,6 +100,9 @@ class NeedleWebElementMixin(object):
             logging.info(f"The element dimensions ({include_dimensions['width']}, {include_dimensions['height']}) "
                   f"are larger than the image size ({image_size[0]}, {image_size[1]}). Resetting the element size to "
                   f"match with the image size.")
+            logging.info(f"The element dimensions ({include_dimensions['width']}, {include_dimensions['height']}) "
+                         f"are larger than the image size ({image_size[0]}, {image_size[1]}). Resetting the element size to "
+                         f"match with the image size.")
             include_dimensions['height'] = image_size[1] if include_dimensions['height'] > image_size[1] else include_dimensions['height']
             include_dimensions['width'] = image_size[0] if include_dimensions['width'] > image_size[0] else include_dimensions['width']
 
